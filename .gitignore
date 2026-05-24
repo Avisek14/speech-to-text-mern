@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+
+# Uploads folder (temp audio files)
+server/uploads/
+
+# Build output
+client/dist/
+
+# OS files
+.DS_Store
