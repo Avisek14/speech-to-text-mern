@@ -1,5 +1,11 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// uploads folder nahi hai to create karo
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
 
 // Storage configuration
 const storage = multer.diskStorage({
