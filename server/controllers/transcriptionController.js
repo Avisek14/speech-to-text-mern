@@ -1,8 +1,15 @@
 const Transcription = require('../models/Transcription');
+const Groq = require('groq-sdk');
+const fs = require('fs');
+const path = require('path');
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 // @desc    Upload audio and transcribe
 // @route   POST /api/transcribe
-// @access  Public (for now)
+// @access  Public
 const transcribeAudio = async (req, res) => {
   try {
     // Check if file exists
@@ -10,12 +17,27 @@ const transcribeAudio = async (req, res) => {
       return res.status(400).json({ message: 'No audio file uploaded' });
     }
 
-    // For now just return file info (Whisper API Day 4 me add karenge)
+    const filePath = path.join(__dirname, '..', 'uploads', req.file.filename);
+
+    // Send to Groq Whisper API
+    const transcription = await groq.audio.transcriptions.create({
+      file: fs.createReadStream(filePath),
+      model: 'whisper-large-v3',
+      response_format: 'verbose_json',
+    });
+
+    // Save to MongoDB
+    const savedTranscription = await Transcription.create({
+      audioFileName: req.file.filename,
+      transcriptionText: transcription.text,
+    });
+
+    // Delete audio file after transcription
+    fs.unlinkSync(filePath);
+
     res.status(200).json({
-      message: 'File uploaded successfully',
-      fileName: req.file.filename,
-      originalName: req.file.originalname,
-      size: req.file.size,
+      message: 'Transcription successful',
+      transcription: savedTranscription,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -24,7 +46,7 @@ const transcribeAudio = async (req, res) => {
 
 // @desc    Get all transcriptions
 // @route   GET /api/transcriptions
-// @access  Public (for now)
+// @access  Public
 const getTranscriptions = async (req, res) => {
   try {
     const transcriptions = await Transcription.find().sort({ createdAt: -1 });
