@@ -11,12 +11,24 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Routes
 app.use('/api/auth', authRoutes)
 app.use('/api', transcriptionRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'VoiceScript API is running 🚀' })
+})
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' })
+})
+
+// Global error handler
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500
+  res.status(statusCode).json({
+    message: err.message || 'Internal Server Error',
+  })
 })
 
 const PORT = process.env.PORT || 5000
