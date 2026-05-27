@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import { useState, useRef } from 'react'
 import axios from 'axios'
 
@@ -11,27 +12,41 @@ const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscripti
 
   // Send audio to backend
   const sendAudio = async (audioBlob, name) => {
-    setLoading(true)
-    setTranscription('')
-    try {
-      const formData = new FormData()
-      formData.append('audio', audioBlob, name)
-      const res = await axios.post('http://localhost:5000/api/transcribe', formData)
-      setTranscription(res.data.transcription.transcriptionText)
-      onNewTranscription(res.data.transcription)
-    } catch (error) {
-      setTranscription('❌ Error: ' + error.message)
-    } finally {
-      setLoading(false)
-    }
+  setLoading(true)
+  setTranscription('')
+  try {
+    const formData = new FormData()
+    formData.append('audio', audioBlob, name)
+    const res = await axios.post('http://localhost:5000/api/transcribe', formData)
+    setTranscription(res.data.transcription.transcriptionText)
+    onNewTranscription(res.data.transcription)
+    toast.success('Transcription complete! 🎉')
+  } catch (error) {
+    toast.error('Transcription failed! Try again.')
+    setTranscription('❌ Error: ' + error.message)
+  } finally {
+    setLoading(false)
   }
+}
 
   // File upload handler
   const handleFileUpload = (file) => {
-    if (!file) return
-    setFileName(file.name)
-    sendAudio(file, file.name)
+  if (!file) return
+  const allowedTypes = /mp3|mp4|wav|m4a|webm|ogg/
+  const extname = allowedTypes.test(
+    file.name.split('.').pop().toLowerCase()
+  )
+  if (!extname && !file.type.startsWith('audio/')) {
+    toast.error('Only audio files allowed! (MP3, WAV, M4A)')
+    return
   }
+  if (file.size > 25 * 1024 * 1024) {
+    toast.error('File too large! Max 25MB allowed.')
+    return
+  }
+  setFileName(file.name)
+  sendAudio(file, file.name)
+}
 
   // Drag and drop
   const handleDrop = (e) => {
