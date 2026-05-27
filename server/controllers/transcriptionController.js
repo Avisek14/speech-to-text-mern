@@ -56,4 +56,20 @@ const getTranscriptions = async (req, res) => {
   }
 };
 
-module.exports = { transcribeAudio, getTranscriptions };
+// @desc    Delete a transcription
+// @route   DELETE /api/transcriptions/:id
+// @access  Public
+const deleteTranscription = async (req, res) => {
+  try {
+    const transcription = await Transcription.findById(req.params.id)
+    if (!transcription) {
+      return res.status(404).json({ message: 'Transcription not found' })
+    }
+    await transcription.deleteOne()
+    res.status(200).json({ message: 'Transcription deleted successfully' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+module.exports = { transcribeAudio, getTranscriptions, deleteTranscription }
