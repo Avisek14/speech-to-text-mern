@@ -6,10 +6,10 @@ const Register = ({ onSwitch }) => {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setLoading(true)
     setError('')
     try {
@@ -62,6 +62,7 @@ const Register = ({ onSwitch }) => {
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
               />
             </div>
+
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Email</label>
               <input
@@ -72,15 +73,25 @@ const Register = ({ onSwitch }) => {
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
               />
             </div>
+
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-400 transition-colors text-xl"
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
 
             <button
