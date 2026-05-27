@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const transcriptionSchema = new mongoose.Schema(
   {
@@ -13,10 +13,10 @@ const transcriptionSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: false, // baad me auth add hone ke baad true karenge
+      required: true,
     },
   },
   { timestamps: true }
-);
+)
 
-module.exports = mongoose.model('Transcription', transcriptionSchema);
+module.exports = mongoose.model('Transcription', transcriptionSchema)

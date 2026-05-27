@@ -6,9 +6,10 @@ const {
   getTranscriptions,
   deleteTranscription,
 } = require('../controllers/transcriptionController')
+const { protect } = require('../middleware/authMiddleware')
 
-router.post('/transcribe', upload.single('audio'), transcribeAudio)
-router.get('/transcriptions', getTranscriptions)
-router.delete('/transcriptions/:id', deleteTranscription)
+router.post('/transcribe', protect, upload.single('audio'), transcribeAudio)
+router.get('/transcriptions', protect, getTranscriptions)
+router.delete('/transcriptions/:id', protect, deleteTranscription)
 
 module.exports = router

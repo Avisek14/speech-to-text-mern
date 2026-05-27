@@ -1,70 +1,69 @@
-const Transcription = require('../models/Transcription');
-const Groq = require('groq-sdk');
-const fs = require('fs');
-const path = require('path');
+const Transcription = require('../models/Transcription')
+const Groq = require('groq-sdk')
+const fs = require('fs')
+const path = require('path')
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-});
+})
 
-// @desc    Upload audio and transcribe
-// @route   POST /api/transcribe
-// @access  Public
+// POST /api/transcribe
 const transcribeAudio = async (req, res) => {
   try {
-    // Check if file exists
     if (!req.file) {
-      return res.status(400).json({ message: 'No audio file uploaded' });
+      return res.status(400).json({ message: 'No audio file uploaded' })
     }
 
-    const filePath = path.join(__dirname, '..', 'uploads', req.file.filename);
+    const filePath = path.join(__dirname, '..', 'uploads', req.file.filename)
 
-    // Send to Groq Whisper API
     const transcription = await groq.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
       model: 'whisper-large-v3',
       response_format: 'verbose_json',
-    });
+    })
 
-    // Save to MongoDB
+    // userId bhi save karo
     const savedTranscription = await Transcription.create({
       audioFileName: req.file.filename,
       transcriptionText: transcription.text,
-    });
+      userId: req.user._id,
+    })
 
-    // Delete audio file after transcription
-    fs.unlinkSync(filePath);
+    fs.unlinkSync(filePath)
 
     res.status(200).json({
       message: 'Transcription successful',
       transcription: savedTranscription,
-    });
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
-// @desc    Get all transcriptions
-// @route   GET /api/transcriptions
-// @access  Public
+// GET /api/transcriptions — sirf us user ki
 const getTranscriptions = async (req, res) => {
   try {
-    const transcriptions = await Transcription.find().sort({ createdAt: -1 });
-    res.status(200).json(transcriptions);
+    const transcriptions = await Transcription.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+    res.status(200).json(transcriptions)
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
-// @desc    Delete a transcription
-// @route   DELETE /api/transcriptions/:id
-// @access  Public
+// DELETE /api/transcriptions/:id
 const deleteTranscription = async (req, res) => {
   try {
     const transcription = await Transcription.findById(req.params.id)
     if (!transcription) {
       return res.status(404).json({ message: 'Transcription not found' })
     }
+
+    // Sirf apni transcription delete kar sake
+    if (transcription.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
+
     await transcription.deleteOne()
     res.status(200).json({ message: 'Transcription deleted successfully' })
   } catch (error) {
