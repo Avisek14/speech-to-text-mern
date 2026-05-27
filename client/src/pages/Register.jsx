@@ -1,22 +1,43 @@
 import { useState } from 'react'
 import axios from 'axios'
+import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 
 const Register = ({ onSwitch }) => {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
 
+  const validate = () => {
+    if (!form.name || !form.email || !form.password) {
+      toast.error('Please fill all fields!')
+      return false
+    }
+    if (form.name.length < 2) {
+      toast.error('Name must be at least 2 characters!')
+      return false
+    }
+    if (!/\S+@\S+\.\S+/.test(form.email)) {
+      toast.error('Please enter a valid email!')
+      return false
+    }
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters!')
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = async () => {
+    if (!validate()) return
     setLoading(true)
-    setError('')
     try {
       const res = await axios.post('http://localhost:5000/api/auth/register', form)
       login(res.data)
+      toast.success(`Account created! Welcome, ${res.data.name}! 🎉`)
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed')
+      toast.error(err.response?.data?.message || 'Registration failed!')
     } finally {
       setLoading(false)
     }
@@ -30,7 +51,6 @@ const Register = ({ onSwitch }) => {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-4 shadow-lg shadow-purple-500/50">
             <span className="text-3xl">🎙️</span>
@@ -41,15 +61,8 @@ const Register = ({ onSwitch }) => {
           <p className="text-gray-400 mt-1">Create your account</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/5 backdrop-blur-lg rounded-3xl border border-white/10 shadow-2xl p-8">
           <h2 className="text-xl font-bold text-white mb-6">Register</h2>
-
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 mb-4 text-sm">
-              {error}
-            </div>
-          )}
 
           <div className="space-y-4">
             <div>
@@ -99,7 +112,12 @@ const Register = ({ onSwitch }) => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl hover:opacity-90 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/30"
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Creating account...
+                </span>
+              ) : 'Create Account'}
             </button>
           </div>
 
