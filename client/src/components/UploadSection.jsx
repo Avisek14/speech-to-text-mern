@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import axios from 'axios'
 
-const UploadSection = ({ setTranscription, setLoading, loading }) => {
+const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscription }) => {
   const [recording, setRecording] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -18,6 +18,7 @@ const UploadSection = ({ setTranscription, setLoading, loading }) => {
       formData.append('audio', audioBlob, name)
       const res = await axios.post('http://localhost:5000/api/transcribe', formData)
       setTranscription(res.data.transcription.transcriptionText)
+      onNewTranscription(res.data.transcription)
     } catch (error) {
       setTranscription('❌ Error: ' + error.message)
     } finally {
