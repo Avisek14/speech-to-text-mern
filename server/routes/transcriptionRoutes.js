@@ -1,12 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const upload = require('../middleware/upload');
+const express = require('express')
+const router = express.Router()
+const upload = require('../middleware/upload')
 const {
   transcribeAudio,
   getTranscriptions,
-} = require('../controllers/transcriptionController');
+  deleteTranscription,
+} = require('../controllers/transcriptionController')
 
-router.post('/transcribe', upload.single('audio'), transcribeAudio);
-router.get('/transcriptions', getTranscriptions);
+router.post('/transcribe', upload.single('audio'), transcribeAudio)
+router.get('/transcriptions', getTranscriptions)
+router.delete('/transcriptions/:id', deleteTranscription)
 
-module.exports = router;
+module.exports = router
