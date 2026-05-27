@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from '../context/AuthContext'
 import UploadSection from '../components/UploadSection'
 import TranscriptionResult from '../components/TranscriptionResult'
 import TranscriptionHistory from '../components/TranscriptionHistory'
 
 const Home = () => {
+  const { user, logout } = useAuth()
   const [transcription, setTranscription] = useState('')
   const [loading, setLoading] = useState(false)
   const [history, setHistory] = useState([])
@@ -40,6 +42,28 @@ const Home = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
+
+        {/* Navbar */}
+        <div className="flex justify-between items-center mb-12">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🎙️</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              VoiceScript
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-400 text-sm">
+              👋 {user.name}
+            </span>
+            <button
+              onClick={logout}
+              className="text-sm text-gray-400 hover:text-red-400 border border-white/10 hover:border-red-400/30 px-4 py-2 rounded-xl transition-all duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-600 rounded-full mb-6 shadow-lg shadow-purple-500/50">
@@ -84,6 +108,7 @@ const Home = () => {
             setHistory={setHistory}
           />
         )}
+
       </div>
     </div>
   )
