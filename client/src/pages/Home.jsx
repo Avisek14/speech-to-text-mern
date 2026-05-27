@@ -1,10 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import UploadSection from '../components/UploadSection'
 import TranscriptionResult from '../components/TranscriptionResult'
+import TranscriptionHistory from '../components/TranscriptionHistory'
 
 const Home = () => {
   const [transcription, setTranscription] = useState('')
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+
+  // Fetch history on page load
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/transcriptions')
+        setHistory(res.data)
+      } catch (error) {
+        console.error('Failed to fetch history:', error)
+      } finally {
+        setHistoryLoading(false)
+      }
+    }
+    fetchHistory()
+  }, [])
+
+  // Jab nai transcription aaye to history me add karo
+  const handleNewTranscription = (newItem) => {
+    setHistory((prev) => [newItem, ...prev])
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
@@ -35,6 +59,7 @@ const Home = () => {
             setTranscription={setTranscription}
             setLoading={setLoading}
             loading={loading}
+            onNewTranscription={handleNewTranscription}
           />
         </div>
 
@@ -46,6 +71,18 @@ const Home = () => {
               loading={loading}
             />
           </div>
+        )}
+
+        {/* History Section */}
+        {historyLoading ? (
+          <div className="text-center mt-10">
+            <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
+        ) : (
+          <TranscriptionHistory
+            history={history}
+            setHistory={setHistory}
+          />
         )}
       </div>
     </div>
