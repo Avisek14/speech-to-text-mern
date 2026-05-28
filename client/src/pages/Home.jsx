@@ -12,11 +12,17 @@ const Home = () => {
   const [history, setHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(true)
 
-  // Fetch history on page load
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/transcriptions')
+        const res = await axios.get(
+          'http://localhost:5000/api/transcriptions',
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        )
         setHistory(res.data)
       } catch (error) {
         console.error('Failed to fetch history:', error)
@@ -27,7 +33,6 @@ const Home = () => {
     fetchHistory()
   }, [])
 
-  // Jab nai transcription aaye to history me add karo
   const handleNewTranscription = (newItem) => {
     setHistory((prev) => [newItem, ...prev])
   }
@@ -44,32 +49,31 @@ const Home = () => {
       <div className="relative z-10 container mx-auto px-4 py-12">
 
         {/* Navbar */}
-<div className="flex justify-between items-center mb-12 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-6 py-4 shadow-lg">
-  <div className="flex items-center gap-3">
-    <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-      <span className="text-lg">🎙️</span>
-    </div>
-    <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-      VoiceScript
-    </span>
-  </div>
-
-  <div className="flex items-center gap-3">
-    <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-      <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
-        {user.name.charAt(0).toUpperCase()}
-      </div>
-      <span className="text-gray-300 text-sm font-medium">{user.name}</span>
-    </div>
-    <button
-      onClick={logout}
-      className="flex items-center gap-2 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 px-4 py-2 rounded-xl transition-all duration-200"
-    >
-      <span>🚪</span>
-      <span>Logout</span>
-    </button>
-  </div>
-</div>
+        <div className="flex justify-between items-center mb-12 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-6 py-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <span className="text-lg">🎙️</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              VoiceScript
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+              <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-gray-300 text-sm font-medium">{user.name}</span>
+            </div>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 px-4 py-2 rounded-xl transition-all duration-200"
+            >
+              <span>🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
 
         {/* Header */}
         <div className="text-center mb-12">

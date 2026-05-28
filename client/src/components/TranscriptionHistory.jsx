@@ -1,17 +1,28 @@
 import { useState } from 'react'
 import axios from 'axios'
+import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 
 const TranscriptionHistory = ({ history, setHistory }) => {
+  const { user } = useAuth()
   const [deletingId, setDeletingId] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
 
   const handleDelete = async (id) => {
     setDeletingId(id)
     try {
-      await axios.delete(`http://localhost:5000/api/transcriptions/${id}`)
+      await axios.delete(
+        `http://localhost:5000/api/transcriptions/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      )
       setHistory((prev) => prev.filter((item) => item._id !== id))
+      toast.success('Transcription deleted!')
     } catch (error) {
-      console.error('Delete failed:', error)
+      toast.error('Delete failed!')
     } finally {
       setDeletingId(null)
     }
@@ -20,6 +31,7 @@ const TranscriptionHistory = ({ history, setHistory }) => {
   const handleCopy = (id, text) => {
     navigator.clipboard.writeText(text)
     setCopiedId(id)
+    toast.success('Copied to clipboard!')
     setTimeout(() => setCopiedId(null), 2000)
   }
 

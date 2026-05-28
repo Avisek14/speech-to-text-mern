@@ -1,8 +1,10 @@
-import toast from 'react-hot-toast'
 import { useState, useRef } from 'react'
 import axios from 'axios'
+import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 
 const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscription }) => {
+  const { user } = useAuth()
   const [recording, setRecording] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -12,41 +14,49 @@ const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscripti
 
   // Send audio to backend
   const sendAudio = async (audioBlob, name) => {
-  setLoading(true)
-  setTranscription('')
-  try {
-    const formData = new FormData()
-    formData.append('audio', audioBlob, name)
-    const res = await axios.post('http://localhost:5000/api/transcribe', formData)
-    setTranscription(res.data.transcription.transcriptionText)
-    onNewTranscription(res.data.transcription)
-    toast.success('Transcription complete! 🎉')
-  } catch (error) {
-    toast.error('Transcription failed! Try again.')
-    setTranscription('❌ Error: ' + error.message)
-  } finally {
-    setLoading(false)
+    setLoading(true)
+    setTranscription('')
+    try {
+      const formData = new FormData()
+      formData.append('audio', audioBlob, name)
+      const res = await axios.post(
+        'http://localhost:5000/api/transcribe',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      )
+      setTranscription(res.data.transcription.transcriptionText)
+      onNewTranscription(res.data.transcription)
+      toast.success('Transcription complete! 🎉')
+    } catch (error) {
+      toast.error('Transcription failed! Try again.')
+      setTranscription('❌ Error: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   // File upload handler
   const handleFileUpload = (file) => {
-  if (!file) return
-  const allowedTypes = /mp3|mp4|wav|m4a|webm|ogg/
-  const extname = allowedTypes.test(
-    file.name.split('.').pop().toLowerCase()
-  )
-  if (!extname && !file.type.startsWith('audio/')) {
-    toast.error('Only audio files allowed! (MP3, WAV, M4A)')
-    return
+    if (!file) return
+    const allowedTypes = /mp3|mp4|wav|m4a|webm|ogg/
+    const extname = allowedTypes.test(
+      file.name.split('.').pop().toLowerCase()
+    )
+    if (!extname && !file.type.startsWith('audio/')) {
+      toast.error('Only audio files allowed! (MP3, WAV, M4A)')
+      return
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error('File too large! Max 25MB allowed.')
+      return
+    }
+    setFileName(file.name)
+    sendAudio(file, file.name)
   }
-  if (file.size > 25 * 1024 * 1024) {
-    toast.error('File too large! Max 25MB allowed.')
-    return
-  }
-  setFileName(file.name)
-  sendAudio(file, file.name)
-}
 
   // Drag and drop
   const handleDrop = (e) => {
@@ -58,29 +68,35 @@ const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscripti
 
   // Start recording
   const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    audioChunksRef.current = []
-    const mediaRecorder = new MediaRecorder(stream)
-    mediaRecorderRef.current = mediaRecorder
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      audioChunksRef.current = []
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
 
-    mediaRecorder.ondataavailable = (e) => {
-      audioChunksRef.current.push(e.data)
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunksRef.current.push(e.data)
+      }
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' })
+        sendAudio(audioBlob, 'recording.wav')
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorder.start()
+      setRecording(true)
+      toast.success('Recording started! 🎙️')
+    } catch (error) {
+      toast.error('Microphone access denied!')
     }
-
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' })
-      sendAudio(audioBlob, 'recording.wav')
-      stream.getTracks().forEach(track => track.stop())
-    }
-
-    mediaRecorder.start()
-    setRecording(true)
   }
 
   // Stop recording
   const stopRecording = () => {
     mediaRecorderRef.current?.stop()
     setRecording(false)
+    toast.success('Recording stopped! Processing...')
   }
 
   return (
@@ -140,11 +156,10 @@ const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscripti
             ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
-          {/* Pulse animation when recording */}
           {recording && (
             <>
               <span className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-30"></span>
-              <span className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20 animation-delay-150"></span>
+              <span className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20"></span>
             </>
           )}
           <span className="text-3xl relative z-10">{recording ? '⏹️' : '🎙️'}</span>
