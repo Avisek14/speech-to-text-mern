@@ -25,6 +25,8 @@ dist-ssr
 
 # Environment variables
 .env
+client/.env
+server/.env
 
 # Uploads folder (temp audio files)
 server/uploads/
