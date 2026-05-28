@@ -16,7 +16,7 @@ const Home = () => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          'http://localhost:5000/api/transcriptions',
+          `${import.meta.env.VITE_API_URL}/api/transcriptions`,
           {
             headers: {
               Authorization: `Bearer ${user.token}`,

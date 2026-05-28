@@ -20,14 +20,14 @@ const UploadSection = ({ setTranscription, setLoading, loading, onNewTranscripti
       const formData = new FormData()
       formData.append('audio', audioBlob, name)
       const res = await axios.post(
-        'http://localhost:5000/api/transcribe',
+        `${import.meta.env.VITE_API_URL}/api/transcribe`,
         formData,
         {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
+            headers: {
+                Authorization: `Bearer ${user.token}`,
+            },
         }
-      )
+    )
       setTranscription(res.data.transcription.transcriptionText)
       onNewTranscription(res.data.transcription)
       toast.success('Transcription complete! 🎉')

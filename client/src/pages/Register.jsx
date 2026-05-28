@@ -33,7 +33,7 @@ const Register = ({ onSwitch }) => {
     if (!validate()) return
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', form)
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, form)
       login(res.data)
       toast.success(`Account created! Welcome, ${res.data.name}! 🎉`)
     } catch (err) {

@@ -29,7 +29,7 @@ const Login = ({ onSwitch }) => {
     if (!validate()) return
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form)
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, form)
       login(res.data)
       toast.success(`Welcome back, ${res.data.name}! 🎙️`)
     } catch (err) {

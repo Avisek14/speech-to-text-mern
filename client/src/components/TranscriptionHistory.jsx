@@ -12,7 +12,7 @@ const TranscriptionHistory = ({ history, setHistory }) => {
     setDeletingId(id)
     try {
       await axios.delete(
-        `http://localhost:5000/api/transcriptions/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/transcriptions/${id}`,
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
