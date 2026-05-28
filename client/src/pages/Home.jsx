@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import UploadSection from '../components/UploadSection'
 import TranscriptionResult from '../components/TranscriptionResult'
 import TranscriptionHistory from '../components/TranscriptionHistory'
+import Footer from '../components/Footer'
 
 const Home = () => {
   const { user, logout } = useAuth()
@@ -120,6 +121,9 @@ const Home = () => {
           />
         )}
 
+        {/* Footer */}
+        <Footer />
+        
       </div>
     </div>
   )
